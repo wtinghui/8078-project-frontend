@@ -1,5 +1,6 @@
 import axios from "axios"
 import { useState, useEffect } from "react"
+import {Link} from 'wouter'
 
 export default function Book(props) {
     const [bookDetails, setBookDetails] = useState(null);
@@ -18,7 +19,8 @@ export default function Book(props) {
     return (
         <>
             {
-                bookDetails ? (<div className="m-3">
+                bookDetails ? (
+                <div className="m-3">
                     <div className="row">
                         <div className="col-7">
                             <h3>
@@ -27,8 +29,8 @@ export default function Book(props) {
                         </div>
                         <div className="col d-flex justify-content-end me-2">
                             <button className="btn btn-primary my-2">
-                                <a href={`/books/${props.id}/create-review`} className="text-decoration-none text-white">Write
-                                    a review</a>
+                                <Link to={`/books/${props.id}/create-review`} className="text-decoration-none text-white">Write
+                                    a review</Link>
                             </button>
                         </div>
                     </div>
@@ -36,7 +38,7 @@ export default function Book(props) {
                     <div>by: {bookDetails?.authors}
                     </div>
 
-                    <div class="d-flex">
+                    <div className="d-flex">
                         {bookDetails?.genres.split(",").map((genre) => {
                             return (
                                 <div className="badge text-bg-primary me-2 my-2">
@@ -49,8 +51,8 @@ export default function Book(props) {
                     <p>
                         {bookDetails?.book_description}
                     </p>
-                    <h4>All Reviews ({bookReviews?.length})</h4>
-                    {bookReviews.map((review) => {
+                    <h4>All Reviews ({bookReviews ? bookReviews.length : 0})</h4>
+                    {bookReviews?.map((review) => {
                         return (
                             <div className="my-3 p-3 border">
                                 <div className="row">
@@ -76,8 +78,10 @@ export default function Book(props) {
                         )
                     })}
 
-
-                </div>) : (<p>Loading, please wait</p>)
+                </div>
+                ) : (
+                    <p>Loading, please wait</p>
+                )
             }
         </>
     )
