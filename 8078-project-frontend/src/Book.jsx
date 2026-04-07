@@ -1,10 +1,13 @@
 import axios from "axios"
 import { useState, useEffect } from "react"
-import {Link} from 'wouter'
+import { useJWT } from "./UserStore"
+import { Link } from 'wouter'
 
 export default function Book(props) {
     const [bookDetails, setBookDetails] = useState(null);
     const [bookReviews, setBookReviews] = useState([]);
+    const [userDetails, setUserDetails] = useState(null);
+    const { getJWT } = useJWT();
 
     useEffect(() => {
         const fetchBookDetails = async () => {
@@ -14,71 +17,92 @@ export default function Book(props) {
             setBookReviews(response.data.bookReviews);
         };
         fetchBookDetails();
+
+        const token = getJWT();
+
+        if (!token){
+            setUserDetails(null);
+        } else {
+            const fetchUserDetails = async () => {
+                const response = await axios.get(import.meta.env.VITE_API_URL + "/users/me", {
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
+                });
+                setUserDetails(response.data.userDetails);
+            };
+            fetchUserDetails();
+        };
+
+        console.log(userDetails);
+
     }, []);
+
+    console.log(bookReviews)
 
     return (
         <>
             {
                 bookDetails ? (
-                <div className="m-3">
-                    <div className="row">
-                        <div className="col-7">
-                            <h3>
-                                {bookDetails?.book_title}
-                            </h3>
+                    <div className="m-3">
+                        <div className="row">
+                            <div className="col-7">
+                                <h3>
+                                    {bookDetails?.book_title}
+                                </h3>
+                            </div>
+                            <div className="col d-flex justify-content-end me-2">
+                                <button className="btn btn-primary my-2">
+                                    <Link to={`/books/${props.id}/create-review`} className="text-decoration-none text-white">Write
+                                        a review</Link>
+                                </button>
+                            </div>
                         </div>
-                        <div className="col d-flex justify-content-end me-2">
-                            <button className="btn btn-primary my-2">
-                                <Link to={`/books/${props.id}/create-review`} className="text-decoration-none text-white">Write
-                                    a review</Link>
-                            </button>
+
+                        <div>by: {bookDetails?.authors}
                         </div>
-                    </div>
 
-                    <div>by: {bookDetails?.authors}
-                    </div>
+                        <div className="d-flex">
+                            {bookDetails?.genres.split(",").map((genre) => {
+                                return (
+                                    <div className="badge text-bg-primary me-2 my-2">
+                                        {genre}
+                                    </div>
+                                )
 
-                    <div className="d-flex">
-                        {bookDetails?.genres.split(",").map((genre) => {
+                            })}
+                        </div>
+                        <p>
+                            {bookDetails?.book_description}
+                        </p>
+                        <h4>All Reviews ({bookReviews ? bookReviews.length : 0})</h4>
+                        {bookReviews?.map((review) => {
                             return (
-                                <div className="badge text-bg-primary me-2 my-2">
-                                    {genre}
+                                <div className="my-3 p-3 border">
+                                    <div className="row">
+                                        <div className="col">
+                                            {review.username ? review.username : "Anonymous"}
+                                        </div>
+                                        <div className="col-9">
+                                            {review.ratings} stars
+                                        </div>
+                                        {review.user_id === userDetails?.user_id &&
+                                            (<div className="col">
+                                                <a className="me-2">Edit</a>
+                                                <a className="me-2">Delete</a>
+                                            </div>)}
+                                    </div>
+                                    <div>
+                                        {review.reviews}
+                                    </div>
+                                    <div className="text-secondary mt-1">
+                                        Last modified: {review.duration < 24 ? review.duration + "h ago" : Math.floor(review.duration / 24) + " day ago"}
+                                    </div>
                                 </div>
-                            )
 
+                            )
                         })}
                     </div>
-                    <p>
-                        {bookDetails?.book_description}
-                    </p>
-                    <h4>All Reviews ({bookReviews ? bookReviews.length : 0})</h4>
-                    {bookReviews?.map((review) => {
-                        return (
-                            <div className="my-3 p-3 border">
-                                <div className="row">
-                                    <div className="col">
-                                        {review.username ? review.username : "Anonymous"}
-                                    </div>
-                                    <div className="col-9">
-                                        {review.ratings} stars
-                                    </div>
-                                    <div className="col">
-                                        <a className="me-2">Edit</a>
-                                        <a className="me-2">Delete</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    {review.reviews}
-                                </div>
-                                <div className="text-secondary mt-1">
-                                    Last modified: {review.duration < 24 ? review.duration + "h ago" : Math.floor(review.duration / 24) + " day ago"}
-                                </div>
-                            </div>
-
-                        )
-                    })}
-
-                </div>
                 ) : (
                     <p>Loading, please wait</p>
                 )

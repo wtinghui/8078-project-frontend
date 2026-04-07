@@ -3,6 +3,7 @@ import { useJWT } from './UserStore';
 import axios from 'axios';
 import { useLocation } from 'wouter';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
+import Greeting from './Greeting.jsx'
 
 export default function UserProfile() {
     const { getJWT, clearJWT } = useJWT();
@@ -63,8 +64,10 @@ export default function UserProfile() {
 
     return (
         <div className="container my-3">
+            <Greeting name={initialValues.username}/>
+            <div className="my-3"></div>
             <div className="d-flex justify-content-between">
-                <h3 className="my-2"> Profile Page</h3>
+                <h5 className="my-2"> Profile</h5>
                 <div>
                     <button type="button" className="btn btn-primary me-2" onClick={() => { setIsEditMode(true) }}>
                         Edit
